@@ -30,7 +30,7 @@ program main
         j=faktorielle(i)
     end do
 
-    write(*,*) 'Faktorielle Berechnung, max. sinnvoller Wert:', i
+    write(*,*) 'Faktorielle Berechnung, max. sinnvoller Wert N_max:', i
     write(*,*) 'benutzte Genauigkeit', kind(i), 'byte Integer'
     print *, ' positive ganze Zahl eingeben (integer)'
     read *, m
