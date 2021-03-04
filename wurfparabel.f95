@@ -31,7 +31,11 @@ program wurfparabel
     integer :: i = 0, m                     !i... Laufvariable, m... Anzahl der Zeilen/Einträge
     double precision, allocatable, dimension(:) :: &
             x,y,vx,vy,t                     ! meine ganzen 1er-Arrays, wobei Größe erst im Programm festgelegt wird, dr. allocate(x(1:m))
-    
+    double precision :: deltat = 0.001d1, &       !einzelner Zeitschritt
+                        x_max=0, y_max=0, &  
+                        bahnlaenge=0           
+    double precision, dimension(1) :: i_max=0      !Für Zeile mit Maximum. i_max=minloc(array,mask array>0) gibt mir zeile wo maximum ist.
+
     character (len=80) :: file_name = &           !filename/directory hier änderbar
             'flug.dat'
     character (len=80) :: file_out = &             !outputfilename/directory hier änderbar.
@@ -88,7 +92,7 @@ program wurfparabel
     
     !i als integer, ist halt dann in Einheiten von 10^-3 Sekunden
     do while(associated(current%next))
-        t(i)=i*10E-3
+        t(i)=0d1
         x(i)=current%n 
         y(i)=current%m
         i=i+1
@@ -104,12 +108,31 @@ program wurfparabel
     !Vorwärtsdifferenzenquotient 
     ! Vx = (f(x+deltax)-f(x))/deltax, analog für y.
     
-    do i=1,m 
-        vx=(x(i+1)-x(i))/t(i)
-        write(*,*) t(i), x(i),y(i)
+    ! Nur bis m-1, verliere einen Eintrag wg. ersten Wert.
+    do i=1,m-1
+        t(i)=t(i)+deltat*i
+        vy(i)=((y(i+1)-y(i))/deltat)
+        vx(i)=((x(i+1)-x(i))/deltat)
+        
+        !write(*,*) t(i), x(i),y(i),vx(i),vy(i)
     end do
-    !do i=1,m 
-    !   
-    !end do
 
+
+    !Ort des Maximums des Arrays suchen. Maximum bei y'=f'(x)=0. in diesem simplen fall.
+    !Bahnlaenge größter X-wert, steht nichts von Abwurf auf Bodenhöhe,
+    !sonst müsst ich mir den y=0 Schnittpunkt suchen
+        i_max=minloc(vy,mask=(vy>0))
+        i=int(i_max(1)) !integer conversion.
+        !da numerisch kann Maximum entweder nächste gräßerer oder nächstkleinerer wert an 0 sein. 
+        !Nächste Zeile checkt ob nächster Funktionswert größer ist, falls ja ist dort das Maximum,
+        !ansosnten nichts tun, weil maximum gefunden.
+        if(y(i)<y(i+1)) i=i+1
+        x_max=x(i)
+        y_max=y(i)
+        bahnlaenge=maxval(x)
+        write(*,*) '# Bahnlaenge=', bahnlaenge, 'Maximum in Zeile', i,'(x_max,y_max)=', x_max, y_max 
+    
+    
+    
+        close (UNIT=100)
 end program wurfparabel
