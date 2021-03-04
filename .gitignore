@@ -1,5 +1,5 @@
 build/
-uebungsangaben\
+
 uebungsangaben/
-flug.dat
 *.mod
+*.dat
