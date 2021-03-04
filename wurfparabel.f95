@@ -32,7 +32,8 @@ program wurfparabel
     double precision, allocatable, dimension(:) :: &
             x,y,vx,vy,t                     ! meine ganzen 1er-Arrays, wobei Größe erst im Programm festgelegt wird, dr. allocate(x(1:m))
     double precision :: deltat = 0.001d1, &       !einzelner Zeitschritt
-                        x_max=0, y_max=0, &  
+                        x_max=0, y_max=0, &
+                        dx = 0, dy=0, &  
                         bahnlaenge=0           
     double precision, dimension(1) :: i_max=0      !Für Zeile mit Maximum. i_max=minloc(array,mask array>0) gibt mir zeile wo maximum ist.
 
@@ -118,18 +119,20 @@ program wurfparabel
     ! Vx = (f(x+deltax)-f(x))/deltax, analog für y.
     
     ! Nur bis m-1, verliere einen Eintrag wg. ersten Wert.
+    !bahnlaenge ~ sqrt(dx^2+dy^2)
     do i=1,m-1
         t(i)=t(i)+deltat*i
-        vy(i)=((y(i+1)-y(i))/deltat)
-        vx(i)=((x(i+1)-x(i))/deltat)
-        
+        dx=x(i+1)-x(i)
+        dy=y(i+1)-y(i)
+        vy(i)=(dy/deltat)
+        vx(i)=(dx/deltat)
+        bahnlaenge=bahnlaenge+sqrt(dx*dx+dy*dy)
         write(200,300) t(i), x(i),y(i),vx(i),vy(i)
     end do
 
 
     !Ort des Maximums des Arrays suchen. Maximum bei y'=f'(x)=0. in diesem simplen fall.
-    !Bahnlaenge größter X-wert, steht nichts von Abwurf auf Bodenhöhe,
-    !sonst müsst ich mir den y=0 Schnittpunkt suchen
+
         i_max=minloc(vy,mask=(vy>0))
         i=int(i_max(1)) !integer conversion.
         !da numerisch kann Maximum entweder nächste gräßerer oder nächstkleinerer wert an 0 sein. 
@@ -138,7 +141,7 @@ program wurfparabel
         if(y(i)<y(i+1)) i=i+1
         x_max=x(i)
         y_max=y(i)
-        bahnlaenge=maxval(x)
+        
         write(200,*) '# Bahnlaenge=', bahnlaenge, 'Max Hoehe', y_max 
     
     
