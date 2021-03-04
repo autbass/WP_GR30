@@ -55,6 +55,15 @@ program wurfparabel
     else
         write(*,*) 'Could not open file:', file_name, 'please check if given path is correct.'
     end if
+
+    open(unit=200, file=file_out, iostat=io_stat_number)
+    !if-Schleife prüft ob File richtig geöffnet wurde Format anweisung für write später einfügen.
+    if (io_stat_number == 0) then
+        write (*,*) file_out, 'opened without any errors'
+    else
+        write(*,*) 'Could not open file:', file_out, 'please check if given path is correct.'
+    end if
+
     !für den Umgang mit meinen oben bestimmten type link hat Elemente root%n, root%m, root%next
     !n, m für Zahlen, next als pointer aufs nächste Element.
     ! Speicher für root alloziieren
@@ -114,7 +123,7 @@ program wurfparabel
         vy(i)=((y(i+1)-y(i))/deltat)
         vx(i)=((x(i+1)-x(i))/deltat)
         
-        !write(*,*) t(i), x(i),y(i),vx(i),vy(i)
+        write(200,300) t(i), x(i),y(i),vx(i),vy(i)
     end do
 
 
@@ -130,9 +139,15 @@ program wurfparabel
         x_max=x(i)
         y_max=y(i)
         bahnlaenge=maxval(x)
-        write(*,*) '# Bahnlaenge=', bahnlaenge, 'Maximum in Zeile', i,'(x_max,y_max)=', x_max, y_max 
+        write(200,*) '# Bahnlaenge=', bahnlaenge, 'Max Hoehe', y_max 
     
     
     
         close (UNIT=100)
+        close (UNIT=200)
+
+        !format labels. Time, x, y, vx, vy, jeweils ein Leerzeichen. 16Stellen, 12 davon hinterm Komma.
+        !f ~ real. e oder g ginge auch.
+300     format(f6.2,' ', f16.12,' ', f16.12, ' ', f16.12,' ', f16.12)
+
 end program wurfparabel
