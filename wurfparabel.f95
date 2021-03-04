@@ -27,16 +27,14 @@ program wurfparabel
     use link_module
     implicit none
     type (link), pointer :: root, current   !Variablen welche nur auf link types pointen darf
-    integer :: io_stat_number = 0          !return von iostat, ob korrekt geöffnet wurde
-    integer :: i = 0, m                     !Laufvariablen
+    integer :: io_stat_number = 0           !return von iostat, 0.. Alles ok, negativ für End of file/end of record, probleme aller art.
+    integer :: i = 0, m                     !i... Laufvariable, m... Anzahl der Zeilen/Einträge
     double precision, allocatable, dimension(:) :: &
-            x,y,vx,vy,t
-    integer, parameter :: n=1000            ! Anzahl einzulesender Zeilen
-    integer :: n_max=0                      ! de-facto Anzahl an Zeilen im File
+            x,y,vx,vy,t                     ! meine ganzen 1er-Arrays, wobei Größe erst im Programm festgelegt wird, dr. allocate(x(1:m))
     
-    character (len=80) :: file_name = &           !filename/directory im header änderbar
+    character (len=80) :: file_name = &           !filename/directory hier änderbar
             'flug.dat'
-    character (len=80) :: file_out = &             !outputfilename/directory änderbar. falls pfad länger als 20 Zeichen erweitern!
+    character (len=80) :: file_out = &             !outputfilename/directory hier änderbar.
             'result.dat'
     
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -53,7 +51,8 @@ program wurfparabel
     else
         write(*,*) 'Could not open file:', file_name, 'please check if given path is correct.'
     end if
-
+    !für den Umgang mit meinen oben bestimmten type link hat Elemente root%n, root%m, root%next
+    !n, m für Zahlen, next als pointer aufs nächste Element.
     ! Speicher für root alloziieren
     allocate(root)
     ! Erste Zahl einlesen, wenn nicht letzte, nächste Zahl einlesen
@@ -62,9 +61,10 @@ program wurfparabel
         i=i+1
         allocate (root%next)
     end if
-    current => root !Zurück zum Listenanfang.
+    current => root !pointer zurück zum Listenanfang.
     !restliche Zahlen einlesen.
-
+    !associated(pointer): associated(pointer) is true if pointer is associated with a target; otherwise, it returns false.
+    !ideal für die do while Bedingung.
     do while (associated(current%next))
         current => current%next
         read (unit=100, fmt=*, iostat=io_stat_number) &
@@ -75,8 +75,9 @@ program wurfparabel
         end if
     end do
     !I sollte jetzt hoffentlich die richtige Anzahl an Zeilen ausgeben.
+    !m ab nun Anzahl der Zeilen, funktioniert.
     m=i
-    write(*,*) 'Anzahl an Zeilen:', m
+    !write(*,*) 'Anzahl an Zeilen:', m
     ! Jetzt kann ich meine ganzen Arrays mit der richtigen Anzahl an Zeilen alloziieren.
     allocate (x(1:m), y(1:m),vx(1:m),vy(1:m),t(1:m))
     !laufindex resetten
@@ -84,8 +85,10 @@ program wurfparabel
     !Nun habe ich meine Arrays, muss Elemente welche ich in die linked-List eingelesen habe 
     !frisch alloziierte Array kopieren, daher pointer wieder an anfang der Linked list setzen
     current => root
+    
+    !i als integer, ist halt dann in Einheiten von 10^-3 Sekunden
     do while(associated(current%next))
-        t(i)=i*10d-2
+        t(i)=i*10E-3
         x(i)=current%n 
         y(i)=current%m
         i=i+1
@@ -97,8 +100,16 @@ program wurfparabel
     !end do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+    !Differenzenquotient kommt als nächstes zur Berechnung der Geschwindikeit.
+    !Vorwärtsdifferenzenquotient 
+    ! Vx = (f(x+deltax)-f(x))/deltax, analog für y.
     
-    
-
+    do i=1,m 
+        vx=(x(i+1)-x(i))/t(i)
+        write(*,*) t(i), x(i),y(i)
+    end do
+    !do i=1,m 
+    !   
+    !end do
 
 end program wurfparabel
