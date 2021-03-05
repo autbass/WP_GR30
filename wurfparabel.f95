@@ -26,8 +26,9 @@ end module link_module
 program wurfparabel
     use link_module
     implicit none
-    type (link), pointer :: root, current   !Variablen welche nur auf link types pointen darf
-    integer :: io_stat_number = 0           !return von iostat, 0.. Alles ok, negativ für End of file/end of record, probleme aller art.
+    type (link), pointer :: root, current, next   !Variablen welche nur auf link types pointen darf
+    integer :: io_stat_number = 0, &          !return von iostat, 0.. Alles ok, negativ warning, positiv error.
+                stat_number=0                 !return für allocate deallocate. 0 für alles ok.
     integer :: i = 0, m                     !i... Laufvariable, m... Anzahl der Zeilen/Einträge
     double precision, allocatable, dimension(:) :: &
             x,y,vx,vy,t                     ! meine ganzen 1er-Arrays, wobei Größe erst im Programm festgelegt wird, dr. allocate(x(1:m))
@@ -52,7 +53,7 @@ program wurfparabel
     
     !if-Schleife prüft ob File richtig geöffnet wurde Format anweisung für write später einfügen.
     if (io_stat_number == 0) then
-        write (*,*) file_name, 'opened without any errors'
+        print*, 'successfully opened: ', file_name
     else
         write(*,*) 'Could not open file:', file_name, 'please check if given path is correct.'
     end if
@@ -60,7 +61,7 @@ program wurfparabel
     open(unit=200, file=file_out, iostat=io_stat_number)
     !if-Schleife prüft ob File richtig geöffnet wurde Format anweisung für write später einfügen.
     if (io_stat_number == 0) then
-        write (*,*) file_out, 'opened without any errors'
+        print *, 'successfully opened: ', file_out
     else
         write(*,*) 'Could not open file:', file_out, 'please check if given path is correct.'
     end if
@@ -68,12 +69,14 @@ program wurfparabel
     !für den Umgang mit meinen oben bestimmten type link hat Elemente root%n, root%m, root%next
     !n, m für Zahlen, next als pointer aufs nächste Element.
     ! Speicher für root alloziieren
-    allocate(root)
+    allocate(root,stat=stat_number)
+    if (stat_number .NE. 0) print *, 'Error allocating pointer'
     ! Erste Zahl einlesen, wenn nicht letzte, nächste Zahl einlesen
     read (unit=100,fmt=*, iostat=io_stat_number) root%n, root%m
     if (io_stat_number==0) then !Nicht am File-Ende
         i=i+1
-        allocate (root%next)
+        allocate (root%next, stat=stat_number)
+        if (stat_number .NE. 0) print *, 'Error allocating pointer'
     end if
     current => root !pointer zurück zum Listenanfang.
     !restliche Zahlen einlesen.
@@ -85,22 +88,25 @@ program wurfparabel
             current%n, current %m
         if (io_stat_number==0) then
             i=i+1
-            allocate (current%next)
+            allocate (current%next, stat=stat_number)
+            if (stat_number .NE. 0) print *, 'Error allocating pointer'
         end if
     end do
+    if(stat_number==0) print *, 'linked list successfully allocated, read', i, 'elements from ', file_name 
     !I sollte jetzt hoffentlich die richtige Anzahl an Zeilen ausgeben.
     !m ab nun Anzahl der Zeilen, funktioniert.
     m=i
     !write(*,*) 'Anzahl an Zeilen:', m
     ! Jetzt kann ich meine ganzen Arrays mit der richtigen Anzahl an Zeilen alloziieren.
-    allocate (x(1:m), y(1:m),vx(1:m),vy(1:m),t(1:m))
+    allocate (x(1:m), y(1:m),vx(1:m),vy(1:m),t(1:m), stat=stat_number)
+    if(stat_number==0) print *, 'All arrays succesfully allocated with', m,'entries'
     !laufindex resetten
     i=1
     !Nun habe ich meine Arrays, muss Elemente welche ich in die linked-List eingelesen habe 
     !frisch alloziierte Array kopieren, daher pointer wieder an anfang der Linked list setzen
     current => root
     
-    !i als integer, ist halt dann in Einheiten von 10^-3 Sekunden
+    !t initilisieren, x,y kopieren aus linked list.
     do while(associated(current%next))
         t(i)=0d1
         x(i)=current%n 
@@ -108,6 +114,8 @@ program wurfparabel
         i=i+1
         current=current%next
     end do
+    current => root
+
     !Zum testen ob read funktioniert hat. Ja!
     !do i=1,m 
     !    write(*,*) t(i), x(i),y(i)
@@ -146,8 +154,24 @@ program wurfparabel
     
     
     
-        close (UNIT=100)
-        close (UNIT=200)
+        close (UNIT=100, iostat=io_stat_number)
+        if (io_stat_number==0) print *, 'closed:', file_name
+        close (UNIT=200, iostat=io_stat_number)
+        if (io_stat_number==0) print *, 'closed:', file_out
+        deallocate(x,y,vx,vy,t)
+        if (stat_number == 0) print *, 'All arrays deallocated'
+        !deallocate linked list..
+        current => root
+        next => current%next
+        do
+           deallocate(current)
+           if (.not. associated(next)) exit
+           current => next
+           next => current%next
+        enddo
+        if (stat_number == 0) print *, 'Linked list deallocated'
+
+
 
         !format labels. Time, x, y, vx, vy, jeweils ein Leerzeichen. 16Stellen, 12 davon hinterm Komma.
         !f ~ real. e oder g ginge auch.
