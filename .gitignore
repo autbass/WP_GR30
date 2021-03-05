@@ -5,4 +5,5 @@ uebungsangaben/
 *.dat
 *.pdf
 *.txt
+*.gp
 Makefile
