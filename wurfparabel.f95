@@ -1,7 +1,6 @@
 ! Einlesen von File
 ! Differenzenquotienten berechnen für Geschwindigkeit
 ! alles doubles
-! überlegen ob 1 array zum abspeichern oder gesonderte für (x, y, t_i), (v_x, v_y)
 
 !Plan:
 !fürs Einlesen: nach Chivers & Sleight, Introduction to Programming with Fortran Abschnitt 22.3
