@@ -7,7 +7,7 @@ program zinsen
 
     open(unit=100, file=file_out, status='replace', iostat=readerror)
     if(readerror .NE. 0) print *, 'error opening file'
-    !Alles in Einheiten von Startkapital 1
+    !Alles in Einheiten von Startkapital 1 
     do i=1,10
         kapital(i)=(1+(1d0/(n)))**(n)
         dev(i)=abs(exp(1.)-kapital(i))

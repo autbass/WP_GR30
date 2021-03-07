@@ -1,0 +1,6 @@
+factorial:factorial.f95
+	gfortran -o ./build/factorial factorial.f95
+wurfparabel:
+
+	rm -r *.mod
+
