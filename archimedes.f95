@@ -9,7 +9,7 @@ module precision_module
 end module precision_module
     
 module maths_module
-    use precision_module, wp => sp !rename-list, working precision -> dp
+    use precision_module, wp => qp !rename-list, working precision -> dp
     !wp then used in all type declarations.
     implicit none
     real (wp), parameter :: pi =  &
@@ -22,7 +22,7 @@ module sub1_area_module
     contains
         subroutine kreisrechner(radius, area, circumference)
 
-            use precision_module, wp => sp
+            use precision_module, wp => qp
             use maths_module
             implicit none
             real (wp), intent(in) :: radius
@@ -33,11 +33,11 @@ module sub1_area_module
         end subroutine kreisrechner
 
         subroutine kreisapprox(n)
-            use precision_module, wp => sp
+            use precision_module, wp => qp
             use maths_module
             implicit none
             real (wp), intent(inout):: n
-            print *, n
+            !print *, n
             n=sqrt(.5_wp*(1_wp-sqrt(1_wp-n*n)))
            
         end subroutine kreisapprox
@@ -47,14 +47,14 @@ module sub1_area_module
 
 program main
 
-    use precision_module, wp=>sp
+    use precision_module, wp => qp
     use maths_module
     use sub1_area_module
 
     implicit none
 
     real(wp) :: r=.5,area=0,circumference=0
-    integer :: n=0, nmax=10 !laufindex
+    integer :: n=0, nmax=1000 !laufindex
     integer :: ecken = 4, eckmin=0 !Anzahl Ecken
     real(wp) :: s=0, smin=0, delta_a=0
     !beginn mit eingeschriebenen quadrat, kreis mit r=1/2 = halbe diagonale
@@ -72,8 +72,8 @@ program main
             smin=s
             eckmin=ecken
         end if
-        print *, s, ecken, s*ecken, abs(pi-s*ecken)
+        !print *, s, ecken, s*ecken, abs(pi-s*ecken), 'working precision:', wp, 'byte'
     end do
-    print *,'kleinste Abweichung von', delta_a, 'bei ', eckmin, '-eck'
+    print *,'kleinste Abweichung von', delta_a, 'bei ', eckmin, '-eck', 'Saitenlänge: ', smin, 'Ergebnis: ', smin*eckmin 
 end program main
 
