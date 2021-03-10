@@ -9,4 +9,5 @@ uebungsangaben/
 *.1
 *.2
 *.3
+*.plt
 Makefile
