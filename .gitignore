@@ -10,4 +10,6 @@ uebungsangaben/
 *.2
 *.3
 *.plt
+Uebung*/
+workspace.*
 Makefile
