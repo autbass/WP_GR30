@@ -11,6 +11,9 @@ uebungsangaben/
 *.2
 *.3
 *.plt
-Uebung*/
+*.odt
+*.png
+*.log
+fort.*
 workspace.*
 Makefile
