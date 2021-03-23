@@ -12,7 +12,7 @@ module filehandler
             integer:: ioerror=0
             open(1, file=filename, FORM='UNFORMATTED',access='direct', recl=2, iostat=ioerror)
             i=1
-            print *, "iostat, Filename:",ioerror, filename
+            if (ioerror /= 0) print *, "Error opening input file:", filename
             do
                 read(1,rec=i,err=100) sample
                 array(i)=dble(sample)
@@ -36,7 +36,19 @@ module filehandler
             end do 
             return 
         end subroutine
+        subroutine print_fourier_to_file(out, arraysize, filename,freq_interval)
+            integer:: arraysize, toelementN, i=1
+            integer:: ioerror=0
+            double complex, dimension(arraysize/2+1) :: out
+            character(len=250), intent(inout) :: filename
+            double precision :: freq_interval
 
+            open(2, file=filename, iostat=ioerror)
+            if (ioerror /= 0) print *, "Error opening output file"
+            do i=1,arraysize/2+1
+                write(2,*) freq_interval*i, ABS(out(i))*ABS(out(i))
+           end do
+        end subroutine
 
     end module filehandler
 
@@ -47,6 +59,7 @@ program main
     include "fftw3.f"
     !Real-input (r2c) DFT plans should use use dfftw_execute_dft_r2c,
     character(len=250)::filename=""
+    character(len=250):: outputfile="fourier_out.dat"
     integer, parameter :: arraysize=450000
     integer :: i=0, ElementeimFile=1
     double precision, dimension(arraysize) :: array=0d0
@@ -56,42 +69,41 @@ program main
 
     integer*8 :: fourier_plan=0
     call get_command_argument(1, filename)
+   ! outputfile=
     if (filename == "") then
-       write(*,*)"Specify a filename!"
+       write(*,*)"Specify a filename! .q for exiting, if you forgot to ls first.."
+
        read(*,*) filename
+       if(filename ==".q") stop
        !stop
     endif
-    write(*,*)"# ",filename
 
-
+    !reads binary data from filename into array, also returns number of Elements in the file.
     call read_binary_int2(filename, array, arraysize, ElementeimFile)
-
-   ! call print_to_screen(array, arraysize, 10)
+    
+    ! prints the first N (10 in this case) Elements of the binary file. Used to check if it worked.
+    ! call print_to_screen(array, arraysize, 10)
+    
+    ! Fourier subroutines from FFTW3
     call dfftw_plan_dft_r2c_1d(fourier_plan,arraysize,array,out,FFTW_ESTIMATE)
     call dfftw_execute_dft_r2c(fourier_plan, array, out)
     call dfftw_destroy_plan(fourier_plan)
     !print *, ElementeimFile !Funktioniert.arraysize/2+1
 
-    freqIntervall=(Freq_max-freq_min)/(arraysize/2+1)
-    !i durch frequenz ersetzen..  Nyquist is 22050 / 2 also 11025, min is freq_min + 11025/ElementeimFile
-    do i=1,arraysize/2+1
-            
-         write(2,*) i, freqintervall*i, ZABS(out(i))*ZABS(out(i))
-    end do
+    ! calculate the Frequency intervals then used to output my data.
+    freqIntervall=(Freq_max-freq_min)/(arraysize/2+1)    
     Dauer_file= dble(ElementeimFile)/dble(sample_rate)
-    Freq_max=1d0/Dauer_file
 
-    print *, ElementeimFile, Dauer_file,"s", Freq_min, Freq_max
+    !Output subroutine
+    call print_fourier_to_file(out, arraysize, outputfile,freqIntervall)
+
+   write(*,1010) filename, outputfile, ElementeimFile, Dauer_file, sample_rate, freqIntervall*(arraysize/2+1)
+
+1010 FORMAT ('Ein paar Infos zum durchgefuehrten:',&
+        /,'Filename Input:', A15,&
+        /,'Filename Output:', A25 ,&
+        /,'Vorhandene Elemente im File', I12,&
+        /,'Dauer des Audios in Sekunden', F12.3,&
+        /,'Sample_rate', I12,&
+        /,'Nyquist Frequenz', F12.0)
 end program
-!
-!To transform a one-dimensional real array in Fortran, you might do:
-!
-!        double precision in
-!        dimension in(N)
-!        double complex out
-!        dimension out(N/2 + 1)
-!        integer*8 plan
-!
-!        call dfftw_plan_dft_r2c_1d(plan,N,in,out,FFTW_ESTIMATE)
-!        call dfftw_execute_dft_r2c(plan, in, out)
-!        call dfftw_destroy_plan(plan)
