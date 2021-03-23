@@ -2,6 +2,7 @@ build/
 
 *.out
 uebungsangaben/
+angabe*/
 *.mod
 *.dat
 *.pdf
@@ -14,6 +15,10 @@ uebungsangaben/
 *.odt
 *.png
 *.log
+*.raw
+*.wav
+*.fft
+*.py
 fort.*
 workspace.*
 Makefile
