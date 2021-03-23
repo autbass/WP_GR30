@@ -19,6 +19,7 @@ angabe*/
 *.wav
 *.fft
 *.py
+*.exe
 fort.*
 workspace.*
 Makefile
