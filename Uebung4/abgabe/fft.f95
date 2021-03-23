@@ -1,3 +1,5 @@
+
+    ! Compile with: gfortran -o fft.exe fft.f95 -I/usr/include -lfftw3
 module filehandler
     implicit none
 
