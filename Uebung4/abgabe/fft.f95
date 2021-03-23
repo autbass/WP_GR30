@@ -51,7 +51,7 @@ program main
     integer :: i=0, ElementeimFile=1
     double precision, dimension(arraysize) :: array=0d0
     integer*2, parameter :: sample_rate = 22050 !1s, entspricht Hz
-    Double precision :: Freq_Min=1d0/dble(sample_rate), Freq_max=1, Dauer_file=1
+    Double precision :: Freq_Min=1d0/dble(sample_rate), Freq_max=11025d0, Dauer_file=1,freqIntervall=0
     double complex, dimension(arraysize/2+1) :: out =0d0
 
     integer*8 :: fourier_plan=0
@@ -72,10 +72,11 @@ program main
     call dfftw_destroy_plan(fourier_plan)
     !print *, ElementeimFile !Funktioniert.arraysize/2+1
 
-
+    freqIntervall=(Freq_max-freq_min)/(arraysize/2+1)
     !i durch frequenz ersetzen..  Nyquist is 22050 / 2 also 11025, min is freq_min + 11025/ElementeimFile
     do i=1,arraysize/2+1
-         write(2,*) i, freq_min+dble(i)/4d0*(dble(sample_rate)/dble(ElementeimFile)), ZABS(out(i))*ZABS(out(i))
+            
+         write(2,*) i, freqintervall*i, ZABS(out(i))*ZABS(out(i))
     end do
     Dauer_file= dble(ElementeimFile)/dble(sample_rate)
     Freq_max=1d0/Dauer_file
