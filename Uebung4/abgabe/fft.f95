@@ -54,7 +54,7 @@ module filehandler
             if (ioerror /= 0) print *, "Error opening output file"
             do i=1,arraysize/2+1
                 write(2,*) freq_interval*i, 20d0*log10((ABS(out(i)))/dB_maxvalue) !20d0*log10((ABS(out(i)))/(dB_maxvalue))
-           end do
+            end do
         end subroutine
 
     end module filehandler
@@ -77,7 +77,7 @@ program main
 
     integer*8 :: fourier_plan=0
     call get_command_argument(1, filename)
-
+    call get_command_argument(2, outputfile)
     if (filename == "") then
         write(*,*)"Specify a filename! .q for exiting, if you forgot to ls first.."
 
@@ -105,7 +105,7 @@ program main
     !Output subroutine
     call print_fourier_to_file(out, arraysize, outputfile,freqIntervall)
 
-   write(*,1010) filename, outputfile, ElementeimFile, Dauer_file, sample_rate, freqIntervall*(arraysize/2+1)
+    write(*,1010) filename, outputfile, ElementeimFile, Dauer_file, sample_rate, freqIntervall*(arraysize/2+1)
 
 1010 FORMAT ('Ein paar Infos zum durchgefuehrten:',&
         /,'Filename Input:', A15,&
