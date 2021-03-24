@@ -1,5 +1,5 @@
 
-    ! Compile with: gfortran -o fft.exe fft.f95 -I/usr/include -lfftw3
+! Compile with: gfortran -o fft.exe fft.f95 -I/usr/include -lfftw3
 module filehandler
     implicit none
 
@@ -64,7 +64,7 @@ program main
     use filehandler
     implicit none
     include "fftw3.f"
-    !Real-input (r2c) DFT plans should use use dfftw_execute_dft_r2c,
+
     character(len=250)::filename=""
     character(len=250):: outputfile="fourier_out.dat"
     integer, parameter :: arraysize=450000
@@ -77,13 +77,13 @@ program main
 
     integer*8 :: fourier_plan=0
     call get_command_argument(1, filename)
-   ! outputfile=
-    if (filename == "") then
-       write(*,*)"Specify a filename! .q for exiting, if you forgot to ls first.."
 
-       read(*,*) filename
-       if(filename ==".q") stop
-       !stop
+    if (filename == "") then
+        write(*,*)"Specify a filename! .q for exiting, if you forgot to ls first.."
+
+        read(*,*) filename
+        if(filename ==".q") stop
+        !stop
     endif
 
     !reads binary data from filename into array, also returns number of Elements in the file.
