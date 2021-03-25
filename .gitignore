@@ -20,6 +20,7 @@ angabe*/
 *.fft
 *.py
 *.exe
+*.cpp
 fort.*
 workspace.*
 Makefile
