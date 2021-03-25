@@ -105,7 +105,7 @@ program main
     !Output subroutine
     call print_fourier_to_file(out, arraysize, outputfile,freqIntervall)
 
-    write(*,1010) filename, outputfile, ElementeimFile, Dauer_file, sample_rate, freqIntervall*(arraysize/2+1)
+    !write(*,1010) filename, outputfile, ElementeimFile, Dauer_file, sample_rate, freqIntervall*(arraysize/2+1)
 
 1010 FORMAT ('Ein paar Infos zum durchgefuehrten:',&
         /,'Filename Input:', A15,&
